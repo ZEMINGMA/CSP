@@ -1,58 +1,67 @@
 #include <iostream>
 using namespace std;
-const int MAX=1e7;
-typedef struct LNode{
+const int MAXN=1e7;
+typedef struct LNode{                       //单链表结点定义
     int num;
     struct LNode *next; 
 }LNode,*LinkList;
 
 LinkList Initialize(LinkList &L,int n);
-int Search(LinkList &L);
+int Search(LinkList L);
 
-LinkList Initialize(LinkList &L,int n){
+LinkList Initialize(LinkList &L,int n){          
     LNode *s;
     L=(LinkList)malloc(sizeof(LNode));
     L->next=NULL;
-    L->num=n;
+    L->num=n;    
+    LNode* temp;
+    temp=(LinkList)malloc(sizeof(LNode));
+    int flag=0;
     for(int i=0;i<n;i++){
         s=(LinkList)malloc(sizeof(LNode));
         cin>>s->num;
-        L->next=s;
-        L=s;
-        cout<<"mzm is a pig"<<endl;
+        if(flag==0){
+            L->next=s;
+            temp=s;
+            flag=1;
+        }
+        else{
+         temp->next=s;
+         temp=s;              
+        }                       //L指向头结点 不应该改变
+       // cout<<"徐梦茜傻瓜傻瓜傻瓜傻瓜"<<endl;
     }
     s->next=NULL;
     return L;
 }
 
 
-int Search(LinkList &L){
-    int i;
-    LNode*s;
-    cin>>i;
-    for(int j=0;j<i;j++){
-     cout<<s->num<<"test"<<endl;
-        s=L->next;
-        L=s;
+int Search(LinkList L){                            //wrong
+    int idx;
+    cin>>idx;                                       //搜索的编号index
+    LNode* temp;
+    temp=(LinkList)malloc(sizeof(LNode));
+    for(int j=0;j<idx;j++){
+        temp=L->next;
+        L=temp;
     }
 
-    return s->num;
+    return temp->num;
 
 }
 
-int arr[MAX];
+int arr[MAXN];
+LinkList L;
+int n,m;
 int main()
 {
-    LinkList L;
-    int n,m;
+
     cin>>n>>m;
+    L=Initialize(L,n);     
 
-    L=Initialize(L,n);
-    
-    for(int i=0;i<m;i++){
+    for(int i=0;i<m;i++)
         arr[i]=Search(L);
-    }
-
+    
     for(int i=0;i<m;i++)
         cout<<arr[i]<<endl;
     system("pause");
