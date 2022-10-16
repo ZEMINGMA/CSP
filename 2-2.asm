@@ -9,12 +9,66 @@
 
 sub eax,eax
 mov ecx,slength
-mov edx, string
+mov edx,string
+mov edi,cmpstr
 dec edx
 
-mov esi,string
-mov
+read:      ;string指针依次读取
+ cmp ecx,0
+    je end
+    
+ dec ecx 
+    inc edx
+    mov bl,[edi]
+    
+    cmp [edx],bl
+    je next1
+    add bl,0x20
+    cmp [edx],bl
+    je next1  
 
+    
+    jmp read
+
+next1:     
+ cmp ecx,0
+    je end
+    
+ dec ecx
+    inc edx
+    mov bl,[edi+1]
+    
+    
+    cmp [edx],bl
+    je next2
+    add bl,0x20
+    cmp [edx],bl
+    je  next2
+
+    jmp read
+
+next2:
+ cmp ecx,0
+    je end
+    
+ dec ecx
+    inc edx
+    mov bl,[edi+2]
+    
+    cmp [edx],bl
+    je right
+    add bl,0x20
+    cmp [edx],bl
+    je  right
+    
+    jmp read
+    
+right:
+    inc eax
+    jmp read
+    
+end:
+ add eax,2
 ;如果一样eax++
 ;****end your code here****
 ;后续程序输出eax中的数值，不需要实现
