@@ -132,7 +132,8 @@ TSMatrix Caculate(linklist L1,linklist L2,char sign)
             }
         }
         else{
-            M.data[i].c=p2->c;
+          if(sign=='-')
+            M.data[i].c=0-p2->c;
             M.data[i].f=p2->f;
             p2=p2->next;
             ++i;
@@ -164,8 +165,9 @@ void PrintMatrix(TSMatrix M)
 {
     //系数不为0，则打印
     int i=0;
-    while(M.data[i].c!=0)
+    while(!(M.data[i].c==0&&M.data[i+1].c==0))
     {
+        if(M.data[i].c!=0)
         printf("%g %d ",M.data[i].c,M.data[i].f);
         ++i;
     }
@@ -325,6 +327,6 @@ int main()
     result=Caculate(L1,L2,sign);
     PrintMatrix(result);
 
-    system("pause");
+
     return 0;
 }
