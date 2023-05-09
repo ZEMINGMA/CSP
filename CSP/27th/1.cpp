@@ -19,6 +19,6 @@ int main()
         b[i]=(remainder[i]-remainder[i-1])/c[i-1];
         cout<<b[i]<<" ";
     }
-    //system("pause");
+    system("pause");
     return 0;
 }
