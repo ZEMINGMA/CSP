@@ -10,15 +10,16 @@ int n,m,q;
 
 typedef struct Role{
     int op_num;
-    string op[N];
     int type_num;
-    string type[N];
     int so_num;
+    string type[N];
+    string op[N];
     string  so[N];
 }Role;
 
 typedef struct User{
     string name;
+    
     int group_num;
     string group[N];
     string op;
@@ -76,40 +77,59 @@ int main()
         vector<string> temp=relation[user.name];
         bool found=false;
         for(auto it =temp.begin();it!=temp.end();++it){
-            auto res_1 = find(role[*it].op + 1, role[*it].op + role[*it].op_num + 1, user.op);
-            auto res_1_1 = find(role[*it].op + 1, role[*it].op + role[*it].op_num + 1, "*");
-            auto res_2 = find(role[*it].type + 1, role[*it].type + role[*it].type_num + 1, user.type);
-            auto res_2_2 = find(role[*it].type + 1, role[*it].type + role[*it].type_num + 1, "*");
-            auto res_3 = find(role[*it].so + 1, role[*it].so + role[*it].so_num + 1, user.so);
-            if (   (res_1 != (role[*it].op + role[*it].op_num + 1) || res_1_1 != (role[*it].op + role[*it].op_num + 1)  )
-                && (res_2 != (role[*it].type + role[*it].type_num + 1) || res_2_2 != (role[*it].type + role[*it].type_num + 1))
-                && (res_3 != (role[*it].so + role[*it].so_num + 1 )|| role[*it].so_num==0)  
-                ){
+
+            if(   count(role[*it].op + 1, role[*it].op + role[*it].op_num + 1, user.op)==0 
+               && count(role[*it].op + 1, role[*it].op + role[*it].op_num + 1, "*")==0
+               )
+               continue;
+            
+            if(   count(role[*it].type + 1, role[*it].type + role[*it].type_num + 1, user.type)==0 
+               && count(role[*it].type + 1, role[*it].type + role[*it].type_num + 1, "*")==0
+               )
+               continue;
+            
+            if(   count(role[*it].so + 1, role[*it].so + role[*it].so_num + 1, user.so)==0 
+               &&  role[*it].so_num!=0
+               )
+               continue;
+
             found=true;
             break;
           }
+        
+        if(!found){
+            // 遍历用户的所有组
+            for (int j = 1; j <= user.group_num && !found; ++j) {
+            vector<string> temp = relation[user.group[j]];
+
+            // 遍历temp中的角色并检查权限
+            for(auto it =temp.begin();it!=temp.end();++it){
+
+                if(   count(role[*it].op + 1, role[*it].op + role[*it].op_num + 1, user.op)==0 
+                && count(role[*it].op + 1, role[*it].op + role[*it].op_num + 1, "*")==0
+                )
+                continue;
+                
+                if(   count(role[*it].type + 1, role[*it].type + role[*it].type_num + 1, user.type)==0 
+                && count(role[*it].type + 1, role[*it].type + role[*it].type_num + 1, "*")==0
+                )
+                continue;
+                
+                if(   count(role[*it].so + 1, role[*it].so + role[*it].so_num + 1, user.so)==0 
+                &&  role[*it].so_num!=0
+                )
+                continue;
+
+                found=true;
+                break;
+            }
+            if(found){
+                break;
+            }
+            }
         }
 
-        // 遍历用户的所有组
-        for (int j = 1; j <= user.group_num && !found; ++j) {
-        vector<string> temp = relation[user.group[j]];
-
-        // 遍历temp中的角色并检查权限
-        for(auto it =temp.begin();it!=temp.end();++it){
-            auto res_1 = find(role[*it].op + 1, role[*it].op + role[*it].op_num + 1, user.op);
-            auto res_1_1 = find(role[*it].op + 1, role[*it].op + role[*it].op_num + 1, "*");
-            auto res_2 = find(role[*it].type + 1, role[*it].type + role[*it].type_num + 1, user.type);
-            auto res_2_2 = find(role[*it].type + 1, role[*it].type + role[*it].type_num + 1, "*");
-            auto res_3 = find(role[*it].so + 1, role[*it].so + role[*it].so_num + 1, user.so);
-            if (   (res_1 != (role[*it].op + role[*it].op_num + 1) || res_1_1 != (role[*it].op + role[*it].op_num + 1)  )
-                && (res_2 != (role[*it].type + role[*it].type_num + 1) || res_2_2 != (role[*it].type + role[*it].type_num + 1))
-                && (res_3 != (role[*it].so + role[*it].so_num + 1 )|| role[*it].so_num==0)  
-                ){
-            found=true;
-            break;
-          }
-        }
-    }
+    
 
      if(found) cout<<1<<endl;
         else cout<<0<<endl;
