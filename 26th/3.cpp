@@ -1,6 +1,7 @@
 #include<iostream>
 #include<string>
 #include<unordered_map>
+#include<unordered_set>
 #include<vector>
 #include<algorithm>
 using namespace std;
@@ -12,16 +13,16 @@ typedef struct Role{
     int op_num;
     int type_num;
     int so_num;
-    string type[N];
-    string op[N];
-    string  so[N];
+    unordered_set<string> op;
+    unordered_set<string> type;
+    unordered_set<string> so;
 }Role;
 
 typedef struct User{
     string name;
-    
+
     int group_num;
-    string group[N];
+    unordered_set<string> group;
     string op;
     string type;
     string so;
@@ -29,27 +30,37 @@ typedef struct User{
 User user;
 
 unordered_map<string,Role> role;
-unordered_map<string,vector<string>> relation;
+unordered_map<string,vector<string>> relation;//前者为用户（用户名）  后者为被授权的角色
 
 int main()
 {
     cin>>n>>m>>q;
 
+    //读入角色
     for(int i=1;i<=n;++i){
         string name;
         cin>>name;
 
         cin>>role[name].op_num;
-        for(int j=1;j<=role[name].op_num;++j)
-            cin>>role[name].op[j];
+        for(int j=1;j<=role[name].op_num;++j){
+            string op;
+            cin>>op;
+            role[name].op.insert(op);
+        }
         
         cin>>role[name].type_num;
-        for(int j=1;j<=role[name].type_num;++j)
-            cin>>role[name].type[j];
+        for(int j=1;j<=role[name].type_num;++j){
+            string type;
+            cin>>type;
+            role[name].type.insert(type);
+        }
         
         cin>>role[name].so_num;
-        for(int j=1;j<=role[name].so_num;++j)
-            cin>>role[name].so[j];
+        for(int j=1;j<=role[name].so_num;++j){
+            string so;
+            cin>>so;
+            role[name].so.insert(so);
+        }
     }
 
     for(int i=1;i<=m;++i){
@@ -68,71 +79,58 @@ int main()
         cin>>user.name;
         cin>>user.group_num;
         for(int j=1;j<=user.group_num;++j){
-            cin>>user.group[j];
+            string group;
+            cin>>group;
+            user.group.insert(group);
         }
         cin>>user.op;
         cin>>user.type;
         cin>>user.so;
 
-        vector<string> temp=relation[user.name];
+        vector<string> temp=relation[user.name];//先查用户名对应的角色权限
         bool found=false;
+
         for(auto it =temp.begin();it!=temp.end();++it){
 
-            if(   count(role[*it].op + 1, role[*it].op + role[*it].op_num + 1, user.op)==0 
-               && count(role[*it].op + 1, role[*it].op + role[*it].op_num + 1, "*")==0
-               )
-               continue;
+            if(role[*it].op.count(user.op)==0 && role[*it].op.count("*")==0)
+                continue;
+
+            if(role[*it].type.count(user.type)==0 && role[*it].type.count("*")==0)
+                continue;
             
-            if(   count(role[*it].type + 1, role[*it].type + role[*it].type_num + 1, user.type)==0 
-               && count(role[*it].type + 1, role[*it].type + role[*it].type_num + 1, "*")==0
-               )
-               continue;
-            
-            if(   count(role[*it].so + 1, role[*it].so + role[*it].so_num + 1, user.so)==0 
-               &&  role[*it].so_num!=0
-               )
-               continue;
+            if(role[*it].so.count(user.so)==0 && role[*it].so_num!=0)
+                continue;
 
             found=true;
             break;
           }
         
-        if(!found){
+
             // 遍历用户的所有组
-            for (int j = 1; j <= user.group_num && !found; ++j) {
-            vector<string> temp = relation[user.group[j]];
+            for (auto role_it = user.group.begin(); role_it != user.group.end() && !found; ++role_it) {
+            vector<string> temp = relation[*role_it];
 
             // 遍历temp中的角色并检查权限
             for(auto it =temp.begin();it!=temp.end();++it){
 
-                if(   count(role[*it].op + 1, role[*it].op + role[*it].op_num + 1, user.op)==0 
-                && count(role[*it].op + 1, role[*it].op + role[*it].op_num + 1, "*")==0
-                )
-                continue;
-                
-                if(   count(role[*it].type + 1, role[*it].type + role[*it].type_num + 1, user.type)==0 
-                && count(role[*it].type + 1, role[*it].type + role[*it].type_num + 1, "*")==0
-                )
-                continue;
-                
-                if(   count(role[*it].so + 1, role[*it].so + role[*it].so_num + 1, user.so)==0 
-                &&  role[*it].so_num!=0
-                )
-                continue;
+                if( role[*it].op.count(user.op)==0 && role[*it].op.count("*")==0)
+                    continue;
 
+                if(role[*it].type.count(user.type)==0 && role[*it].type.count("*")==0)
+                    continue;
+                
+                if(role[*it].so.count(user.so)==0 && role[*it].so_num!=0)
+                    continue;
+                    
                 found=true;
                 break;
+                }
             }
-            if(found){
-                break;
-            }
-            }
-        }
-
-    
 
      if(found) cout<<1<<endl;
         else cout<<0<<endl;
+    
+        user.group.clear();//要清空！
     }
 
 
