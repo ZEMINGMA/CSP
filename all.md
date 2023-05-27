@@ -55,6 +55,210 @@ output_file.close();
 
 ```
 
+# 01背包
+#### 法一：暴搜
+
+1. 一个n位的2进制数，每一位选or不选即可
+2. `i>>j&1` 用来判断第j位是否为1，从最低位（第0位开始）
+3. `i< 1<<n` 则是遍历一个n为二进制数，0-$2^n$
+
+#### 法二：01背包
+
+1. 要使得花费最小，实则要使sum-x这一段取n本书的总和最大
+2. 背包容量为sum-x
+3. 每一个物品的体积为a[i]，每一个物品的价值也为a[i]
+4. 所以正序遍历物品，逆序循环体积（打板子） （逆序遍历体积是因为在一维背包下，状态的更新取决于前置状态，但是前序状态已经被污染，如果是二维则可以正序遍历体积）
+
+
+#### 1.二维状态
+
+```cpp
+for(int i=1;i<=n;++i)       //遍历物品
+    for(int j=1;j<=m;++j){  //遍历体积
+        if(j<v[i])
+            f[i][j]=f[i-1][j];//拿不了 则第i个状态的价值等价于第i-1个状态
+        else
+            f[i][j]=max(f[i-1][j],f[i-1][j-v[i]]+w[i]);
+    }
+```
+
+#### 2.一维状态
+
+1.直接定义 `f[j]` 为n个物品下容量为j的背包的最优解 这样就可以直接决策到第i件物品
+2.一定得逆序遍历体积，避免前置状态被污染(若j从小到大，f[j-v[i]]中，由于j-v[i]小于j，f[j-v[i]]已经在i这层循环被计算了，而我们想要的f[j-v[i]]应该是i-1层循环里面的，所以j从大到小的话保证此时的f[j-v[i]]还未被计算，也就是第i-1层的数据)
+3.同时我们枚举的背包容量只有在大于`v[i]`的时候才会更新状态，所以我们可以继续优化循环终止的条件
+
+```cpp
+for(int i=1;i<=n;++i)
+    for(int j=m;j>=v[i];--j)
+        f[j]=max(f[j],f[j-v[i]]+w[i]);
+```
+
+
+# 去除连续重复
+```cpp
+v[i].erase(unique(v[i].begin(), v[i].end()), v[i].end());
+```
+
+1.`unique(v[i].begin(), v[i].end())`: `unique`函数接收两个迭代器作为参数，表示操作的范围。在这里，`v[i].begin()`和`v[i].end()`表示对`v[i]`这个`vector`中的所有元素进行去重操作。`unique`函数将连续重复的元素移到`vector`的尾部，并返回一个指向去重后新的尾部的迭代器。
+需要注意的是，unique函数只去除**连续重复**的元素，所以在使用`unique`之前，如果需要完全去重，**你需要对vector进行排序**！！！。
+
+`v[i].erase(first, last)`: `erase`函数用于删除`vector`中`[first, last)`范围内的元素。在这里，`first`是`unique`函数返回的迭代器，`last`是`v[i].end()`。这意味着从`unique`函数返回的迭代器指向的位置开始，一直到`vector`的尾部，都是被移动到尾部的重复元素，`erase`函数将这些元素删除。
+综上所述，这段代码的作用是去除`v[i]`这个`vector`中的连续重复元素。如果需要完全去除`v[i]`中的所有重复元素，可以在使用`unique`和`erase`函数之前，对`v[i]`进行排序。
+
+
+![1684246661034](25th/image/2/1684246661034.png)
+
+
+# 前缀和
+
+1.定义一个`sum[]`数组，`sum[i]`代表`a`数组中前`i`个数的和。
+```cpp
+for(int i = 1; i <= n;i++)
+{ 
+    sum[i] = sum[i - 1] + a[i];   
+}
+```
+
+2.查询l到r的和
+
+只需要O(1)的时间复杂度即可
+```cpp
+sum[r]-sum[l-1]
+```
+
+# 差分
+
+1.可以直接理解成前缀和的逆运算
+
+![1684252003109](25th/image/2/1684252003109.png)
+
+2.区间l到r全部加上c
+时间复杂度O(1)
+
+**a数组是b数组的前缀和数组**，比如对`b`数组的`b[i]`的修改，会影响到`a`数组中从`a[i]`及往后的每一个数。
+
+```cpp
+b[l] += c;     //将序列中[l, r]之间的每个数都加上c
+b[r + 1] -= c;
+
+for (int i = 1; i <= n; i++)
+{
+    a[i] = b[i] + a[i - 1];    //前缀和运算
+    printf("%d ", a[i]);
+}
+```
+当然也可以直接
+```cpp
+for(int i=1;i<N;++i)
+    b[i]+=b[i-1];
+```
+这样得到的就是a数组
+
+# 二维前缀和
+
+```cpp
+
+    for(int i=1;i<=n;++i){
+        for(int j=1;j<=n;++j){
+            int x;
+            cin>>x;
+            sum[i][j]=x+sum[i-1][j]+sum[i][j-1]-sum[i-1][j-1];
+        }
+    }
+
+    for(int i=1;i<=n;++i){
+        for(int j=1;j<=n;++j){
+            int x1=max(1,i-r),y1=max(1,j-r);
+            int x2=min(n,i+r),y2=min(n,j+r);
+            int total=sum[x2][y2]+sum[x1-1][y1-1]-sum[x1-1][y2]-sum[x2][y1-1];
+
+            int cnt=(x2-x1+1)*(y2-y1+1)*t;
+            if(total<=cnt) ans++;
+        }
+    }
+
+```
+
+# 排序 运算符重载
+```cpp
+#include<iostream>
+#include<algorithm>
+#include<cmath>
+using namespace std;
+
+
+int n,X,Y;
+const int N=205;
+typedef struct  Point
+{
+    int x,y,id;
+    int  dis;
+    bool operator < (const Point &t){
+        if(dis!=t.dis) return dis<t.dis;
+        return id<t.id;
+    }
+}Point;
+
+Point pos[N];
+
+int get_dis(int x,int y,int X,int Y){
+    return pow( (x-X),2)+pow((y-Y),2);
+}
+
+
+int main()
+{
+    cin>>n>>X>>Y;
+    for(int i=1;i<=n;++i){
+        pos[i].id=i;
+        cin>>pos[i].x>>pos[i].y;
+        pos[i].dis=get_dis(X,Y,pos[i].x,pos[i].y);
+    }
+    sort(pos+1,pos+n+1);
+    cout<<pos[1].id<<endl<<pos[2].id<<endl<<pos[3].id<<endl;
+    system("pause");
+    return 0;
+}
+```
+
+# 状压DP
+```cpp
+#include<iostream>
+#include<iomanip>
+using namespace std;
+ 
+double f[16*5+1][1<<16];//[coin][state]
+double p[16+1];
+int  n,k;
+
+double dp(double depth,int  coin,int  state,double cnt){
+    if(f[coin][state]) return f[coin][state];//记忆化搜索
+    if(coin>=cnt*k) return depth;//返回搜索的层数
+    double s=0;
+
+    //遍历所有的卡
+    for(int i=0;i<n;++i){
+        if((state>>i)&1)
+            s+=p[i]*dp(depth+1,coin+1,state,cnt);
+        else
+            s+=p[i]*dp(depth+1,coin,state|(1<<i),cnt-1);
+    }
+    f[coin][state]=s;
+    return s;
+}
+
+int  main()
+{
+    cin>>n>>k;
+    for(int i=0;i<n;++i)
+        cin>>p[i];
+    
+    cout<<setprecision(11)<<dp(0,0,0,n);
+    system("pause");
+    return 0;
+}
+```
 # vector
 
 1. `push_back()`：在vector的尾部添加一个新元素。
@@ -694,5 +898,48 @@ for (const auto& elem : lst) {
 
  # algorithm
 
+C++ 标准库中的 `<algorithm>` 头文件包含一系列在各种数据结构上进行操作的函数模板。以下是 `<algorithm>` 中一些常用函数的简单概述：
 
- 
+1. `sort(begin, end)`: 对序列进行排序。
+
+2. `stable_sort(begin, end)`: 对序列进行稳定排序，保持等价元素的相对顺序。
+
+3. `partial_sort(begin, middle, end)`: 对序列的前N个元素进行排序。
+
+4. `nth_element(begin, nth, end)`: 对序列进行部分排序，使得 nth 位置的元素位于排序后应该在的位置，其左侧的元素不大于它，其右侧的元素不小于它。
+
+5. `binary_search(begin, end, value)`: 在排序序列中进行二分查找。
+
+6. `lower_bound(begin, end, value)`: 返回指向首个不小于给定值的元素的迭代器。
+
+7. `upper_bound(begin, end, value)`: 返回指向首个大于给定值的元素的迭代器。
+
+8. `equal_range(begin, end, value)`: 返回等于给定值的元素的范围。
+
+9. `merge(begin1, end1, begin2, end2, dest)`: 合并两个有序序列。
+
+10. `find(begin, end, value)`: 在序列中查找等于给定值的元素。
+
+11. `find_if(begin, end, predicate)`: 在序列中查找满足谓词的第一个元素。
+
+12. `count(begin, end, value)`: 计算序列中等于给定值的元素的数量。
+
+13. `count_if(begin, end, predicate)`: 计算序列中满足谓词的元素的数量。
+
+14. `replace(begin, end, old_value, new_value)`: 将序列中所有等于 old_value 的元素替换为 new_value。
+
+15. `replace_if(begin, end, predicate, new_value)`: 将序列中所有满足谓词的元素替换为 new_value。
+
+16. `remove(begin, end, value)`: 移除序列中所有等于给定值的元素。
+
+17. `remove_if(begin, end, predicate)`: 移除序列中所有满足谓词的元素。
+
+18. `unique(begin, end)`: 移除序列中所有相邻重复元素。
+
+19. `reverse(begin, end)`: 将序列中的元素反转。
+
+20. `random_shuffle(begin, end)`: 对序列中的元素进行随机重排。
+
+以上所有函数中，`begin` 和 `end` 是序列的起始和结束迭代器，`value` 是需要查找、计数、替换或移除的值，`predicate` 是一个一元函数，用于测试元素是否满足某个条件。注意，部分函数需要输入序列是
+
+有序的，否则结果未定义。
