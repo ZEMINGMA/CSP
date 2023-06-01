@@ -28,7 +28,7 @@ int  main()
     for(int i=0;i<n;++i)
         cin>>p[i];
     
-    cout<<setprecision(11)<<dp(0,0,0,n);
+    printf("%.10lf",dp(0,0,0,n));
     system("pause");
     return 0;
 }
