@@ -17,7 +17,9 @@ int main()
         m[l]=r;
     }
     for(auto i=m.begin();i!=m.end();i++){
-        
+        if(i->first>mr){
+            
+        }
     }
 
 
